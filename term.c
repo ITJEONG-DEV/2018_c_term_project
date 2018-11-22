@@ -44,7 +44,7 @@ int main()
    _DAY * targetDay = initTargetDay(monthDay);
 
    char view_Type = 'D'; // Day Week Month 등 뷰 타입 변경
-   int onlyRegisteredSchedules = 0; // 일정이 등록된 날짜만 보기(Week Month Type에서만)
+   int onlyRegisteredSchedules = 0; // 일정이 등록된 날짜만 보기
 
    targetDay = addDay(targetDay, 1, monthDay);
 
