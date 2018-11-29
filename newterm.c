@@ -5,7 +5,6 @@
 #define MAX_TITLE_LENGTH 30
 #define MAX_CONTENT_LENGTH 100
 
-#define MAX_YEAR 2500
 #define MAX_MONTH 12
 #define MAX_DATE 31
 
@@ -29,13 +28,13 @@ int main()
 
    Plan **** year = NULL;
 
-   year = initialSet(MAX_YEAR, monthDay);
+   year = initialSet(year, monthDay);
 
 }
 
 int isLeapYear(int year)
 {
-   if( ( year % 4 ) && !( year % 100 ) || ( year % 400 ) ) return 1;
+   if( !( year % 4 == 0 ) && ( year % 100 ) || !( year % 400 ) ) return 1;
    else return 0;
 }
 int getDayoftheWeekNum(int year, int month, int day)
@@ -108,34 +107,34 @@ Plan **** createYear(Plan **** plan, int numberofYear)
 {
     if (plan)
     {
+        printf("isPlan\n");
         plan = ( Plan **** )realloc( plan, sizeof( Plan *** ) * (numberofYear));
     }
     else
     {
+        printf("isNotPlan\n");
         plan = ( Plan **** )malloc( sizeof( Plan *** ) * numberofYear);
     }
+    printf("numberofYear : %d\n", numberofYear);
+    printf("sizeof(plan) : %lld\n", (long long int)sizeof(plan));
+    printf("sizeof(Plan ***) : %lld\n", (long long int)sizeof(Plan ***));
+    printf("sizeof(Plan ****) : %lld\n", (long long int)sizeof(Plan ****));
+    printf("num : %lld\n", (long long int)( sizeof(plan)/sizeof(Plan ***) ));
 
     return plan;
 }
 
 Plan *** createMonth(Plan *** plan)
 {
-    int monthDay[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-
     if (!plan)
     {
         plan = ( Plan *** )malloc( sizeof( Plan ** ) * 12 );
-
-        int i;
-
-        for(i = 0; i < 12; i++)
-            plan[i] = createDay(monthDay[i] + )
     }
 
     return plan;
 }
 
-Plan ** createDay(int numberofDay)
+Plan ** createDay(Plan ** plan, int numberofDay)
 {
     if (!plan)
     {

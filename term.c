@@ -4,6 +4,7 @@
 
 #define MAX_TITLE_LENGTH 30
 #define MAX_CONTENT_LENGTH 100
+#define MAX_STRING_LENGTH 250
 
 #define MAX_MONTH 12
 #define MAX_DATE 31
@@ -28,11 +29,17 @@ typedef struct Day
 
 int isLeapYear(int year); //윤년인지 아닌지를 판단하는 함수
 char * getDayoftheWeek(int year, int month, int day); // 년, 월, 일을 넘기면 요일을 반환하는 함수
+
+void setPlan(_PLAN *plan ); // plan 초기 설정
 _DAY * initTargetDay(int monthDay[]); // 오늘 날짜를 받아와서 기준일을 생성하는 함수
-void displayDay(_DAY * targetDay); // 해당 날의 정보를 모두 출력하는 함수
+
 void displayPlan(_PLAN * plan); // 해당 날의 일정을 모두 출력하는 함수
+void displayDay(_DAY * targetDay); // 해당 날의 정보를 모두 출력하는 함수
+char displayMenu(); // 메뉴를 출력하는 함수
+
 _DAY * addDay(_DAY * day, int type, int monthDay[]); // type > 0 then tomorrow else yesterday
-_PLAN * addPlanContext(_PLAN * plan); // 실제로 plan에 데이터를 추가하는 함수
+
+_PLAN * addPlanContent(_PLAN * plan); // 실제로 plan에 데이터를 추가하는 함수
 _DAY * addPlan(_DAY * day); // plan 데이터를 추가할 공간을 만드는 함수
 _DAY * editPlan(_DAY * day); // plan 데이터를 수정하는 함수
 _DAY * deletePlan(_DAY * day); // plan 데이터를 삭제하는 함수
@@ -46,18 +53,18 @@ int main()
    char view_Type = 'D'; // Day Week Month 등 뷰 타입 변경
    int onlyRegisteredSchedules = 0; // 일정이 등록된 날짜만 보기
 
-   targetDay = addDay(targetDay, 1, monthDay);
+   char answer;
 
-   displayDay(targetDay);
-
+   // targetDay = addDay(targetDay., 1, monthDay);
+   printf("\n\nTODAY : %s\n\n", getDayoftheWeek(targetDay->year, targetDay->month, targetDay->day));
 }
 
+// 
 int isLeapYear(int year)
 {
    if( !(year % 4) && (year % 100) || !(year % 400) ) return 1;
    else return 0;
 }
-
 char * getDayoftheWeek(int year, int month, int day)
 {
    int monthDay[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -68,23 +75,34 @@ char * getDayoftheWeek(int year, int month, int day)
 
    int i;
 
-   int date = (year-1900)*365;
+   int date = year*365;
+   date += year/4;
+   date +=day;
+   date -= 2;
 
    for( i = 1; i < month; i++ )
    {
-      if( i == 2 && isLeapYear(year) )
-         ++date;
+      if( isLeapYear(year) && i < 3 ) --date;
+      // if( i == 2 && isLeapYear(year) ) ++date;
 
-      date+=monthDay[i];
+      date+=monthDay[i-1];
    }
 
-   date+=day;
+
 
    char * tmp = malloc(sizeof(char)*3);
 
-   strcpy( tmp, dayoftheWeek[date&7]);
+   strcpy( tmp, dayoftheWeek[date%7]);
 
    return tmp;
+}
+
+// 
+void setPlan(_PLAN * plan)
+{   
+   plan = (_PLAN * )malloc(sizeof(_PLAN));
+   plan->title = NULL;
+   plan->content = NULL;
 }
 _DAY * initTargetDay(int monthDay[])
 {
@@ -96,10 +114,10 @@ _DAY * initTargetDay(int monthDay[])
    {
       printf("년 월 일을 입력하세요. 입력 형태 : 20181105\n> ");
       scanf("%d", &day);
-      printf("%d\n", day);
+      // printf("%d\n", day);
 
       targetDay->year = day/10000;
-      printf("year : %d\n", targetDay->year);
+      // printf("year : %d\n", targetDay->year);
       if( targetDay->year < 0 )
       {
           printf("[error]올바른 년도를 입력하세요. 기원전의 연도는 취급하지 않습니다.\n");
@@ -107,7 +125,7 @@ _DAY * initTargetDay(int monthDay[])
       }
 
       targetDay->month = (day/100)%100;
-      printf("month : %d\n", targetDay->month);
+      // printf("month : %d\n", targetDay->month);
       if( targetDay->month < 1 || targetDay->month > 12 )
       {
          printf("[error]올바른 월을 입력하세요.\n");
@@ -115,8 +133,8 @@ _DAY * initTargetDay(int monthDay[])
       }
 
       targetDay->day = day%100;
-      printf("day : %d\n", targetDay->day);
-      if( targetDay->day < 1 || targetDay->day > monthDay[targetDay->month] )
+      // printf("day : %d\n", targetDay->day);
+      if( targetDay->day < 1 || targetDay->day > monthDay[targetDay->month -1 ] )
       {
          printf("[error]올바른 일을 입력하세요.\n");
          continue;
@@ -125,13 +143,22 @@ _DAY * initTargetDay(int monthDay[])
       break;
    }
 
+   targetDay->tomorrow = NULL;
+   targetDay->yesterday = NULL;
+
+   setPlan(targetDay->plan);
+
    return targetDay;
 }
 
+// 
 void displayPlan(_PLAN * plan)
 {
+  if(plan)
+  {
     int sizeofPlan = sizeof(plan);
     int numberofPlan = sizeofPlan / sizeof(_PLAN);
+
     int i;
 
     for( i = 0; i < numberofPlan; i++, plan++)
@@ -139,18 +166,44 @@ void displayPlan(_PLAN * plan)
     {
         printf(">%s\n%s\n\n", plan->title, plan->content);
     }
+  }
+  else
+      printf("등록된 일정이 없습니다.\n\n");
 }
-
 void displayDay(_DAY * targetDay)
 {
-   printf("%4d-%2d-%2d ", targetDay->year, targetDay->month, targetDay->day);
-   printf("%s\n", getDayoftheWeek(targetDay->year, targetDay->month, targetDay->day));
+   printf("\n[ %4d-%2d-%2d ", targetDay->year, targetDay->month, targetDay->day);
+   printf("%s ]\n\n", getDayoftheWeek(targetDay->year, targetDay->month, targetDay->day));
 
    int i = 0;
 
    displayPlan(targetDay->plan);
 }
+char displayMenu()
+{
+  char answer;
 
+  printf("<이전\t\t\t|\t\t\t다음>\n");
+  printf("=====================================================\n");
+  printf("1. 타입 변경\n");
+  printf("2. 일정 추가\n");
+  printf("3. 일정 삭제\n");
+  printf("4. 일정 수정\n");
+  printf("0. 프로그램 종료\n");
+  printf("( 이전 일정을 보려면 '<'를, 다음 일정을 보려면 '>'를 입력하세요 )\n\n> ");
+
+  while(1)
+  {
+    scanf("%c", &answer);
+
+    if( ( answer >= '0' && answer <= '4' ) || answer == '<' || answer == '>' )
+      break;
+  }
+
+  return answer;
+}
+
+//
 _DAY * addDay(_DAY * day, int type, int monthDay[])
 {
     _DAY * newDay = (_DAY *)malloc(sizeof(_DAY));
@@ -195,40 +248,60 @@ _DAY * addDay(_DAY * day, int type, int monthDay[])
 
     }
 
+    setPlan(newDay->plan);
+
     return newDay;
 }
 
-_PLAN * addPlanContext(_PLAN * plan)
+//
+_PLAN * addPlanContent(_PLAN * plan)
 {
+  char * tmp = (char *)malloc(sizeof(char)*MAX_STRING_LENGTH);
+
     while(1)
     {
         printf("일정의 제목을 입력하세요. 최대 %d자까지 입력.\n", MAX_TITLE_LENGTH );
-        if( gets( plan->title ) ) break;
+        scanf("%s", tmp);
     }
 
     while(1)
     {
         printf("일정의 내용을 입력하세요. 최대 %d자까지 입력.\n", MAX_CONTENT_LENGTH );
-        if( gets( plan->content) ) break;
+        scanf("%s", tmp);
     }
 
     printf("입력이 완료되었습니다.\n");
     printf("> %s\n%s", plan->title, plan->content);
 }
-
 _DAY * addPlan(_DAY * day)
 {
+  _PLAN * tmpPlan = day->plan;
+
+  if(day->plan)
+  {
     int sizeofPlan = sizeof(day->plan);
     int sizeof_PLAN = sizeof(_PLAN);
     int numberofPlan = sizeofPlan/sizeof_PLAN;
 
-    _PLAN * tmpPlan = day->plan;
+    realloc( day->plan, sizeof(_PLAN) * (numberofPlan + 1));
+    tmpPlan += numberofPlan;
+  }
+  else
+  {
+    tmpPlan = (_PLAN *)malloc(sizeof(_PLAN));
+  }
 
-    if( ! ( numberofPlan == 1 && !strcmp( day->plan->title, "\0") ) )
-    {
-        realloc( day->plan, sizeof(_PLAN) * (numberofPlan + 1));
-        tmpPlan += numberofPlan;
-    }
+    addPlanContent(tmpPlan);
+}
+_DAY * editPlan(_DAY * day)
+{
+  printf("아직 완성되지 않은 함수입니다.\n");
 
-    addPlanContext(tmpPlan);
+  return day;
+}
+_DAY * deletePlan(_DAY * day)
+{
+  printf("아직 완성되지 않은 함수입니다.\n");
+
+  return day;
 }
