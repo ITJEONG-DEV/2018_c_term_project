@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define LIMIT_YEAR 9999
+#define LIMIT_MONTH 12
+#define MIN_YEAR 1900
+
 typedef struct
 {
 	char * title;
@@ -12,6 +16,14 @@ typedef struct
 int isLeapYear(int year);
 int getDayoftheWeekNum(int year, int month, int day);
 char * getDayoftheWeek(int year, int month, int day);
+int inValidDate(int type);
+
+// primary function
+char editViewType();
+int editViewTypeOnlyScheduledDays();
+void addPlan(Plan **** data);
+void deletePlan(Plan **** data);
+void editPlan(Plan **** data);
 
 // show data
 void showPlan(Plan * plan);
@@ -35,17 +47,32 @@ void deleteMonth(Plan ** data, int month, int isLeap);
 void deleteYear(Plan *** data, int isLeap);
 void deleteData(Plan **** data, int maxYear);
 
-int main(void)
+void main(void)
 {
    int monthDay[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
+   printf("1");
+
 	int BASE_YEAR = setBaseYear();
+
+	printf("2");
+
 	int BASE_MONTH = setBaseMonth();
+
+	printf("3");
+
 	int BASE_DAY = setBaseDay(isLeapYear(BASE_YEAR), monthDay[BASE_MONTH-1]);
+
+	printf("4");
+
 	int MAX_YEAR = BASE_YEAR;
+
+	printf("5");
 
 	int VIEW_TYPE = 'D';
 	int VIEW_ONLY_SCHEDULED_DAYS = 0;
+
+	printf("6");
 
 	Plan **** data = initData(MAX_YEAR);
 
@@ -59,18 +86,76 @@ int main(void)
 				case '0' :
 					return;
 				case '1' :
+					VIEW_TYPE = editViewType();
+					VIEW_ONLY_SCHEDULED_DAYS = editViewTypeOnlyScheduledDays();
 				break;
 				case '2' :
+					addPlan(data);
 				break;
 				case '3' :
+					deletePlan(data);
 				break;
 				case '4' :
+					editPlan(data);
 				break;
 				case '5' :
+					BASE_YEAR = setBaseYear();
+					BASE_MONTH = setBaseMonth();
+					BASE_DAY = setBaseDay(isLeapYear(BASE_YEAR), monthDay[BASE_MONTH-1]);
+					MAX_YEAR = MAX_YEAR > BASE_YEAR ? MAX_YEAR : BASE_YEAR;
 				break;
 				case '<' :
+					if(BASE_DAY == 1)
+					{
+						if(BASE_MONTH == 1)
+						{
+							if(BASE_YEAR == 1)
+							{
+								printf("\n앞으로 갈 수 없습니다.");
+							}
+							else
+							{
+								BASE_YEAR--;
+								BASE_MONTH = LIMIT_MONTH;
+								BASE_DAY = monthDay[BASE_MONTH-1];
+							}
+						}
+						else
+						{
+							BASE_MONTH--;
+							BASE_DAY = monthDay[BASE_MONTH-1];
+						}
+					}
+					else
+					{
+						BASE_DAY--;
+					}
 				break;
 				case '>' :
+					if(BASE_DAY == monthDay[BASE_MONTH-1] + isLeapYear(BASE_YEAR)&&BASE_MONTH==2?1:0)
+					{
+						if(BASE_MONTH==12)
+						{
+							if(BASE_YEAR==MAX_YEAR++)
+							{
+								data = realloc( data, sizeof(Plan ***) * (MAX_YEAR-BASE_YEAR+1));
+							}
+							else
+							{
+								BASE_MONTH=1;
+								BASE_DAY=1;
+							}
+						}
+						else
+						{
+							BASE_MONTH++;
+							BASE_DAY=1;
+						}
+					}
+					else
+					{
+						BASE_DAY++;
+					}
 				break;
 			}
 	}
@@ -116,6 +201,112 @@ char * getDayoftheWeek(int year, int month, int day)
 	strcpy( tmp, dayoftheWeek[getDayoftheWeekNum(year,month,day)]);
 
 	return tmp;
+}
+int inValidDate(int type)
+{
+	int monthDay[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+	int date, y, m, d;
+	while(1)
+	{
+		switch(type)
+		{
+			case 1:
+				printf("추가할 날짜를 입력하세요. 입력예시:20181129\n > ");
+			break;
+			case 2:
+				printf("삭제할 날짜를 입력하세요. 입력예시:20181129\n > ");
+			break;
+			case 3:
+				printf("수정할 날짜를 입력하세요. 입력예시:20181129\n > ");
+			break;
+		}
+
+		scanf("%d", &date);
+
+		y = date/10000;
+		if(y<MIN_YEAR || y>LIMIT_YEAR)
+		{
+			printf("잘못된 년도입니다. 다시 입력해 주세요.\n");
+			continue;
+		}
+
+		m = (date/100)%100;
+		if(m<1 || m > LIMIT_MONTH)
+		{
+			printf("잘못된 월입니다. 다시 입력해 주세요.\n");
+			continue;
+		}
+
+		d = date%100;
+		if(d<1 || d > monthDay[m] + (isLeapYear(y)&&m==2?1:0) )
+		{
+			printf("잘못된 일입니다. 다시 입력해 주세요.\n");
+			continue;
+		}
+
+		return date;
+	}
+}
+
+
+// primary function
+char editViewType()
+{
+	char c;
+	return c;
+}
+int editViewTypeOnlyScheduledDays()
+{
+	int n;
+
+	return n;
+}
+void addPlan(Plan **** data)
+{
+	int date = inValidDate(1);
+	int y, m, d;
+
+	y = date/10000;
+	m = (date/100)%100;
+	d = date%100;
+}
+void deletePlan(Plan **** data)
+{
+	int date = inValidDate(2);
+	int y, m, d;
+
+	y = date/10000;
+	m = (date/100)%100;
+	d = date%100;
+
+	if( data[y][m][d] )
+	{
+		printf("등록된 일정 : %d개\n", (int)(sizeof(data[y][m][d])/sizeof(Plan)) );
+	}
+	else
+	{
+		printf("해당 날짜에는 등록된 일정이 없습니다.");
+	}
+
+}
+void editPlan(Plan **** data)
+{
+	int date = inValidDate(3);
+	int y, m, d;
+
+	y = date/10000;
+	m = (date/100)%100;
+	d = date%100;
+
+	if( data[y][m][d] )
+	{
+		printf("등록된 일정 : %d개\n", (int)(sizeof(data[y][m][d])/sizeof(Plan)) );
+	}
+	else
+	{
+		printf("해당 날짜에는 등록된 일정이 없습니다.");
+	}
 }
 
 // show data
@@ -165,10 +356,10 @@ int setBaseYear()
 		printf("기준 년도를 입력하세요.\n> ");
 		scanf("%d", &base);
 
-		if(base>0)
+		if(base>=1900 && base<10000)
 			return base;
 
-		printf("올바른 년도를 입력하세요. 기원 전은 취급하지 않습니다.\n");		
+		printf("올바른 년도를 입력하세요. 1900~9999년 사이만 가능합니다.\n");
 	}
 }
 int setBaseMonth()
@@ -192,15 +383,26 @@ int setBaseDay(int isLeap, int monthDay)
 
 	while(1)
 	{
+		printf("a");
+
 		printf("기준 일을 입력하세요.\n> ");
+
+		printf("b");
+
 		scanf("%d", &base);
 
+		printf("c");
+
 		if( monthDay == 28 && isLeap )monthDay++;
+
+		printf("d");
 
 		if(base>0 && base<=monthDay)
 			return base;
 
-		printf("올바른 월을 입력하세요. 범위는 1 이상 %d 이하입니다.\n", monthDay);		
+		printf("e");
+
+		printf("올바른 월을 입력하세요. 범위는 1 이상 %d 이하입니다.\n", monthDay);
 	}
 }
 
@@ -225,11 +427,11 @@ Plan *** initYear()
 }
 Plan **** initData(int MAX_YEAR)
 {
-	Plan **** data = malloc(sizeof(Plan ***) * MAX_YEAR);
+	Plan **** data = malloc(sizeof(Plan ***) * (MAX_YEAR-MIN_YEAR+1));
 
 	int i;
 
-	for(i = 0; i < MAX_YEAR; i++)
+	for(i = 0; i < MAX_YEAR-MIN_YEAR+1; i++)
 		data[i] = initYear();
 
 	return data;
