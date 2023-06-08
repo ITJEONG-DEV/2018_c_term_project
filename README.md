@@ -53,3 +53,7 @@
     - WEEK+ VIEW
     - MONTH+ VIEW
 <br>
+
+## 라이센스
+
+MIT &copy; [ITJEONG](mailto:derbana1027@gmail.com)
