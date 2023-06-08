@@ -3,6 +3,15 @@
 ## c언어 수업 텀 프로젝트
 <br>
 
+<br>
+
+## 기술 스택
+
+| C |
+| :--------: |
+|   <img src="https://raw.githubusercontent.com/ITJEONG-DEV/README/main/.images/c.png" width="200" height="180"/>   |
+
+
 ### 조건
 
 #### 1. 일정관리 프로그램 만들기
