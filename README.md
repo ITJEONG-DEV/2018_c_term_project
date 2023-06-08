@@ -9,7 +9,7 @@
 
 | C |
 | :--------: |
-|   <img src="https://raw.githubusercontent.com/ITJEONG-DEV/README/main/.images/c.png" width="200" height="180"/>   |
+|   <img src="https://raw.githubusercontent.com/ITJEONG-DEV/README/main/.images/c.png" width="180" height="180"/>   |
 
 
 ### 조건
